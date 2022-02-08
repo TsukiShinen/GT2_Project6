@@ -4,15 +4,18 @@ using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
+    public static GridManager Instance;
+
     #region Variables
     [Header("Grid Parameters")]
 
-    [Range(1,50)]
+    private GameObject[,] grid;
+    [Range(1, 50)]
     public int nbrColumns = 10;
     [Range(1, 50)]
     public int nbrLines = 10;
-    [Range(0, 0.5f)]
-    public float offset = 0;
+    //[Range(0, 0.5f)]
+    //private float offset = 0;
 
     [Header("Prefabs")]
 
@@ -20,26 +23,32 @@ public class GridManager : MonoBehaviour
     private GameObject alivePrefab;
     [SerializeField]
     private GameObject deadPrefab;
+
     #endregion
 
     private void Awake()
     {
-        for (int i=0; i<nbrColumns;i++)
+        if (Instance == null)
         {
-            for(int j=0; j<nbrLines;j++)
+            Instance = this;
+            CreateGrid();
+        }
+        else { Destroy(gameObject); }
+
+    }
+
+    void CreateGrid()
+    {
+        grid = new GameObject[nbrLines, nbrColumns];
+
+        for (int i = 0; i < nbrLines; i++)
+        {
+            for (int j = 0; j < nbrColumns; j++)
             {
-                Instantiate(deadPrefab,new Vector3(i+i*offset,j+j*offset,0),new Quaternion());
+                //GameObject clone = Instantiate(deadPrefab, new Vector3(j + j * offset, i + i * offset, 0), new Quaternion());
+                GameObject clone = Instantiate(deadPrefab, new Vector3(j, i, 0), new Quaternion());
+                grid[i, j] = clone;
             }
         }
-    }
-
-    void Start()
-    {
-        
-    }
-
-    void Update()
-    {
-        
     }
 }
