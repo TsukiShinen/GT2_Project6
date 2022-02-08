@@ -166,10 +166,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e8602382efe924fa14f88c4a2c69a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nbrColumns: 10
-  nbrLines: 10
-  alivePrefab: {fileID: 1480256495940042869, guid: 8291b3990cb359a4bb0637dd00e99709, type: 3}
-  deadPrefab: {fileID: 8042349015284026797, guid: 9349ed05b3addc246941eef743e08422, type: 3}
+  _nbrColumns: 10
+  _nbrLines: 10
+  _alivePrefab: {fileID: 1480256495940042869, guid: 8291b3990cb359a4bb0637dd00e99709, type: 3}
+  _deadPrefab: {fileID: 8042349015284026797, guid: 9349ed05b3addc246941eef743e08422, type: 3}
 --- !u!1 &368928579
 GameObject:
   m_ObjectHideFlags: 0

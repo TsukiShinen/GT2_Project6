@@ -12,6 +12,7 @@ public class CameraMove : MonoBehaviour
         float InputY = Input.GetAxisRaw("Vertical");
         float InputZ = Input.mouseScrollDelta.y;
 
-        transform.Translate(new Vector3(InputX, InputY, InputZ * speed) * speed * Time.deltaTime);
+        transform.Translate(new Vector3(InputX, InputY, 0) * speed * Time.deltaTime);
+        GetComponent<Camera>().orthographicSize += InputZ * speed * Time.deltaTime;
     }
 }
