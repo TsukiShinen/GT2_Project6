@@ -57,8 +57,7 @@ public class GridManager : MonoBehaviour
         {
             for (int j = 0; j < _nbrColumns; j++)
             {
-                GameObject clone = Instantiate(_deadPrefab, new Vector3(j, i, 0), new Quaternion(), transform);
-                _grid[i, j] = clone;
+                _grid[i, j] = Instantiate(_deadPrefab, new Vector3(j, i, 0), new Quaternion(), transform);
             }
         }
     }
@@ -66,34 +65,20 @@ public class GridManager : MonoBehaviour
     public void OnClick()
     {
         Vector2 mouseCoords = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 tileCoord = convertToGrid(mouseCoords);
 
         // Verify Coord
-        if (!(tileCoord.x >= 0 && tileCoord.x < _nbrColumns &&
-              tileCoord.y >= 0 && tileCoord.y < _nbrLines)) { return; }
+        if (!(mouseCoords.x >= 0 && mouseCoords.x < _nbrColumns &&
+              mouseCoords.y >= 0 && mouseCoords.y < _nbrLines)) { return; }
 
-        changeTile(tileCoord);
+        changeTile(mouseCoords);
     }
 
-
-    private Vector2 convertToGrid(Vector2 mousePos)
-    {
-        return new Vector2(mousePos.x / GridManager.Instance._nbrLines * 10,
-                           mousePos.y / GridManager.Instance._nbrColumns * 10);
-    }
     private void changeTile(Vector2 tileCoord)
     {
         GameObject tile = _grid[(int)tileCoord.y, (int)tileCoord.x];
+        GameObject prefabUsed = (tile.tag == _deadPrefab.tag) ? _alivePrefab : _deadPrefab;
 
-        if (tile.tag.ToLower() == "dead")
-        {
-            tile.GetComponentInChildren<MeshRenderer>().sharedMaterial = _alivePrefab.GetComponentInChildren<MeshRenderer>().sharedMaterial;
-            tile.tag = "Alive";
-        } 
-        else
-        {
-            tile.GetComponentInChildren<MeshRenderer>().sharedMaterial = _deadPrefab.GetComponentInChildren<MeshRenderer>().sharedMaterial;
-            tile.tag = "Dead";
-        }
+        tile.GetComponentInChildren<MeshRenderer>().sharedMaterial = prefabUsed.GetComponentInChildren<MeshRenderer>().sharedMaterial;
+        tile.tag = prefabUsed.tag;
     }
  }
