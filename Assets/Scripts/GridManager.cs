@@ -66,7 +66,7 @@ public class GridManager : MonoBehaviour
     {
         Vector2 mouseCoords = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        // Verify Coord
+        // Check if click is inside
         if (!(mouseCoords.x >= 0 && mouseCoords.x < _nbrColumns &&
               mouseCoords.y >= 0 && mouseCoords.y < _nbrLines)) { return; }
 
@@ -75,7 +75,7 @@ public class GridManager : MonoBehaviour
 
     private void changeTile(Vector2 tileCoord)
     {
-        GameObject tile = _grid[(int)tileCoord.y, (int)tileCoord.x];
+        GameObject tile = _grid[Mathf.FloorToInt(tileCoord.y), Mathf.FloorToInt(tileCoord.x)];
         GameObject prefabUsed = (tile.tag == _deadPrefab.tag) ? _alivePrefab : _deadPrefab;
 
         tile.GetComponentInChildren<MeshRenderer>().sharedMaterial = prefabUsed.GetComponentInChildren<MeshRenderer>().sharedMaterial;
