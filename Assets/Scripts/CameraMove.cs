@@ -13,6 +13,6 @@ public class CameraMove : MonoBehaviour
         float InputZ = Input.mouseScrollDelta.y;
 
         transform.Translate(new Vector3(InputX, InputY, 0) * speed * Time.deltaTime);
-        GetComponent<Camera>().orthographicSize += InputZ * speed * Time.deltaTime;
+        GetComponent<Camera>().orthographicSize -= InputZ * speed * Time.deltaTime;
     }
 }
