@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour
@@ -31,17 +32,23 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     [Range(1, 50)]
     private int _nbrLines = 10;
+    [SerializeField]
+    private float _speed = 1;
 
     [Header("Prefabs")]
 
     [SerializeField]
-    private GameObject _alivePrefab;
+    private GameObject _cellPrefab;
     [SerializeField]
-    private GameObject _deadPrefab;
+    private Material _aliveMaterial;
+    [SerializeField]
+    private Material _deadMaterial;
     #endregion
 
     #region Private
     private GameObject[,] _grid;
+
+    private bool _running = false;
     #endregion
 
     private void Init()
@@ -57,13 +64,15 @@ public class GridManager : MonoBehaviour
         {
             for (int j = 0; j < _nbrColumns; j++)
             {
-                _grid[i, j] = Instantiate(_deadPrefab, new Vector3(j, i, 0), new Quaternion(), transform);
+                _grid[i, j] = Instantiate(_cellPrefab, new Vector3(j, i, 0), new Quaternion(), transform);
             }
         }
     }
 
     public void OnClick()
     {
+        if (_running) { return; }
+
         Vector2 mouseCoords = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         // Check if click is inside
@@ -75,10 +84,94 @@ public class GridManager : MonoBehaviour
 
     private void changeTile(Vector2 tileCoord)
     {
-        GameObject tile = _grid[Mathf.FloorToInt(tileCoord.y), Mathf.FloorToInt(tileCoord.x)];
-        GameObject prefabUsed = (tile.tag == _deadPrefab.tag) ? _alivePrefab : _deadPrefab;
+        GameObject cell = _grid[Mathf.FloorToInt(tileCoord.y), Mathf.FloorToInt(tileCoord.x)];
+        Material material = (cell.tag == "Dead") ? _aliveMaterial : _deadMaterial;
+        string tag = (cell.tag == "Dead") ? "Alive" : "Dead";
 
-        tile.GetComponentInChildren<MeshRenderer>().sharedMaterial = prefabUsed.GetComponentInChildren<MeshRenderer>().sharedMaterial;
-        tile.tag = prefabUsed.tag;
+        cell.GetComponentInChildren<MeshRenderer>().sharedMaterial = material;
+        cell.tag = tag;
     }
- }
+
+    public void StartGame()
+    {
+        _running = true;
+
+        Invoke("UpdateGame", _speed);
+    }
+
+    private void UpdateGame()
+    {
+        if (!_running) { return; }
+
+        int[,] changeGrid = new int[_nbrLines, _nbrColumns];
+        for (int i = 0; i < _nbrLines; i++)
+        {
+            for (int j = 0; j < _nbrColumns; j++)
+            {
+                changeGrid[i, j] = UpdateCell(new Vector2(j,i));
+            }
+        }
+
+        for (int i = 0; i < _nbrLines; i++)
+        {
+            for (int j = 0; j < _nbrColumns; j++)
+            {
+                GameObject cell = _grid[Mathf.FloorToInt(i), Mathf.FloorToInt(j)];
+
+                if (changeGrid[i,j] == 0)
+                {
+                    cell.GetComponentInChildren<MeshRenderer>().sharedMaterial = _deadMaterial;
+                    cell.tag = "Dead";
+                }
+
+                if (changeGrid[i, j] == 1)
+                {
+                    cell.GetComponentInChildren<MeshRenderer>().sharedMaterial = _aliveMaterial;
+                    cell.tag = "Alive";
+                }
+            }
+        }
+
+        Invoke("UpdateGame", _speed);
+    }
+
+    private int UpdateCell(Vector2 pPosition)
+    {
+        int neighborsAlive = GetNbrNeighborsAlive(pPosition);
+        GameObject cell = _grid[Mathf.FloorToInt(pPosition.y), Mathf.FloorToInt(pPosition.x)];
+
+        if (cell.tag == "Dead" && neighborsAlive == 3)
+        {
+            return 1;
+        } 
+        else if (cell.tag == "Alive" && (neighborsAlive < 2 || neighborsAlive > 3))
+        {
+            return 0;
+        }
+
+        return -1;
+    }
+
+    private int GetNbrNeighborsAlive(Vector2 pPosition)
+    {
+        int neighborsAlive = 0;
+
+        for (int i = (int)(pPosition.y - 1); i <= (int)(pPosition.y + 1); i++)
+        {
+            for (int j = (int)(pPosition.x - 1); j <= (int)(pPosition.x + 1); j++)
+            {
+                if (!(pPosition.y == i && pPosition.x == j))
+                {
+                    if (!(i < 0 || i >= _nbrLines || j < 0 || j >= _nbrColumns)) 
+                    {
+                        if (_grid[i, j].tag == "Alive") 
+                        {
+                            neighborsAlive++;
+                        }
+                    }
+                }
+            }
+        }
+        return neighborsAlive;
+    }
+}

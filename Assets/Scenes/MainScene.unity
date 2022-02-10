@@ -425,10 +425,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e8602382efe924fa14f88c4a2c69a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _nbrColumns: 10
-  _nbrLines: 10
-  _alivePrefab: {fileID: 1480256495940042869, guid: 8291b3990cb359a4bb0637dd00e99709, type: 3}
-  _deadPrefab: {fileID: 8042349015284026797, guid: 9349ed05b3addc246941eef743e08422, type: 3}
+  _nbrColumns: 50
+  _nbrLines: 50
+  _speed: 0.5
+  _cellPrefab: {fileID: 8042349015284026797, guid: 9349ed05b3addc246941eef743e08422, type: 3}
+  _aliveMaterial: {fileID: 2100000, guid: 52eec1a3608d02046b01f26ab323451c, type: 2}
+  _deadMaterial: {fileID: 2100000, guid: 819dc1fff4b813b479f558f087edcee3, type: 2}
 --- !u!1 &235590990
 GameObject:
   m_ObjectHideFlags: 0
