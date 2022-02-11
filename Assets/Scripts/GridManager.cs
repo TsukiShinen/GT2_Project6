@@ -42,7 +42,6 @@ public class GridManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
     }
     #endregion
 
@@ -85,6 +84,7 @@ public class GridManager : MonoBehaviour
     {
         LoadSettings();
         CreateGrid();
+        CameraManager.Instance.CameraInit();
     }
 
     private void LoadSettings()
