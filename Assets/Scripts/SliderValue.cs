@@ -6,15 +6,15 @@ using TMPro;
 public class SliderValue : MonoBehaviour
 {
 
-    TMP_Text percentageText;
+    TMP_Text text;
 
-    void Start()
+    void Awake()
     {
-        percentageText = GetComponent<TMP_Text>();
+        text = GetComponent<TMP_Text>();
     }
 
     public void TextUpdate(float value)
     {
-        percentageText.text = value+""; 
+        text.text = value.ToString(); 
     }
 }
