@@ -37,7 +37,7 @@ public class CameraManager : MonoBehaviour
 
     }
 
-    /*void Update()
+    void Update()
     {
         float InputX = Input.GetAxisRaw("Horizontal");
         float InputY = Input.GetAxisRaw("Vertical");
@@ -45,5 +45,5 @@ public class CameraManager : MonoBehaviour
 
         transform.Translate(new Vector3(InputX, InputY, 0) * camSpeed * Time.deltaTime);
         GetComponent<Camera>().orthographicSize -= InputZ * camSpeed * Time.deltaTime;
-    }*/
+    }
 }
