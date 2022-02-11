@@ -14,7 +14,6 @@ public class GridManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(this);
-            Init();
         }
         else
         {
@@ -33,7 +32,7 @@ public class GridManager : MonoBehaviour
     [Range(1, 50)]
     private int _nbrLines = 10;
     [SerializeField]
-    private float _speed = 1;
+    private int _speed = 2;
 
     [Header("Prefabs")]
 
@@ -50,6 +49,14 @@ public class GridManager : MonoBehaviour
 
     private bool _running = false;
     #endregion
+
+    private void Start()
+    {
+        if (PlayerPrefs.HasKey("nbrLines")) { _nbrLines = PlayerPrefs.GetInt("nbrLines"); }
+        if (PlayerPrefs.HasKey("nbrColumns")) { _nbrColumns = PlayerPrefs.GetInt("nbrColumns"); }
+        if (PlayerPrefs.HasKey("speed")) { _speed = PlayerPrefs.GetInt("speed"); }
+        Init();
+    }
 
     private void Init()
     {
@@ -96,7 +103,7 @@ public class GridManager : MonoBehaviour
     {
         _running = true;
 
-        Invoke("UpdateGame", _speed);
+        Invoke("UpdateGame", 1/_speed);
     }
 
     private void UpdateGame()
@@ -132,7 +139,7 @@ public class GridManager : MonoBehaviour
             }
         }
 
-        Invoke("UpdateGame", _speed);
+        Invoke("UpdateGame", 1/_speed);
     }
 
     private int UpdateCell(Vector2 pPosition)
