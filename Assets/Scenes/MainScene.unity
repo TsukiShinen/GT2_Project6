@@ -215,7 +215,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1202298288}
         m_TargetAssemblyTypeName: OptionsMenu, Assembly-CSharp
-        m_MethodName: setColumns
+        m_MethodName: SetColumns
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3089,7 +3089,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1202298288}
         m_TargetAssemblyTypeName: OptionsMenu, Assembly-CSharp
-        m_MethodName: setLines
+        m_MethodName: SetLines
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3278,7 +3278,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1202298288}
         m_TargetAssemblyTypeName: OptionsMenu, Assembly-CSharp
-        m_MethodName: setSpeed
+        m_MethodName: SetSpeed
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -5,19 +5,19 @@ using UnityEngine;
 public class OptionsMenu : MonoBehaviour
 {
 
-    public void setLines(float nbrLines)
+    public void SetLines(float nbrLines)
     {
         PlayerPrefs.SetInt("nbrLines", (int)nbrLines);
         PlayerPrefs.Save();
     }
 
-    public void setColumns(float nbrColumns)
+    public void SetColumns(float nbrColumns)
     {
         PlayerPrefs.SetInt("nbrColumns", (int)nbrColumns);
         PlayerPrefs.Save();
     }
 
-    public void setSpeed(float speed)
+    public void SetSpeed(float speed)
     {
         PlayerPrefs.SetInt("speed", (int)speed);
         PlayerPrefs.Save();
