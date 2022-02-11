@@ -112,6 +112,8 @@ public class GridManager : MonoBehaviour
 
     private void Update()
     {
+        if (!_running) { return; }
+
         counter += Time.deltaTime;
 
         if (!(counter >= _stepPerSeconds)) { return; }
@@ -148,90 +150,74 @@ public class GridManager : MonoBehaviour
         _lstCells[index].mesh.sharedMaterial = (_lstCells[index].isAlive) ? _deadMaterial : _aliveMaterial;
         _lstCells[index].isAlive = !_lstCells[index].isAlive;
     }
+    private void changeTile(int index)
+    {
+        _lstCells[index].mesh.sharedMaterial = (_lstCells[index].isAlive) ? _deadMaterial : _aliveMaterial;
+        _lstCells[index].isAlive = !_lstCells[index].isAlive;
+    }
 
     private async void SimulationStep()
     {
-        Task[] taskArray = new Task[_nbrColumns * _nbrLines];
-        for (int i = 0; i < taskArray.Length; i++)
+        List<Task<int>> tasks = new List<Task<int>>();
+        for (int i = 0; i < _lstCells.Length; i++)
         {
-            //taskArray[i].
+            var index = i;
+            tasks.Add(Task.Run(() => UpdateCell(index)));
+        }
+        List<int> lstIndexToModify = new List<int>();
+        while (tasks.Count > 0)
+        {
+            var finishedTask = await Task.WhenAny(tasks);
+
+            if (finishedTask.Result != -1)
+            {
+                lstIndexToModify.Add(finishedTask.Result);
+            }
+
+            tasks.Remove(finishedTask);
+        }
+
+        foreach (int index in lstIndexToModify)
+        {
+            changeTile(index);
         }
     }
+
+    private int UpdateCell(int index)
+    {
+        int neighborsAlive = GetNbrNeighborsAlive(index);
+        if (!_lstCells[index].isAlive && neighborsAlive == 3)
+        {
+            return index;
+        } 
+        else if (_lstCells[index].isAlive && (neighborsAlive < 2 || neighborsAlive > 3))
+        {
+            return index;
+        }
+
+        return -1;
+    }
+
+    private int GetNbrNeighborsAlive(int index)
+    {
+        int neighborsAlive = 0;
+        for (int i = _lstCells[index].y - 1; i <= _lstCells[index].y + 1; i++)
+        {
+            for (int j = _lstCells[index].x - 1; j <= _lstCells[index].x + 1; j++)
+            {
+                if (!(_lstCells[index].y == i && _lstCells[index].x == j))
+                {
+                    if (!(i < 0 || i >= _nbrLines || j < 0 || j >= _nbrColumns))
+                    {
+                        if (_lstCells[i * _nbrColumns + j].isAlive)
+                        {
+                            neighborsAlive++;
+                        }
+                    }
+                }
+            }
+        }
+        return neighborsAlive;
+    }
     #endregion
-
-    //private void UpdateGame()
-    //{
-    //    if (!_running) { return; }
-
-    //    int[,] changeGrid = new int[_nbrLines, _nbrColumns];
-    //    for (int i = 0; i < _nbrLines; i++)
-    //    {
-    //        for (int j = 0; j < _nbrColumns; j++)
-    //        {
-    //            changeGrid[i, j] = UpdateCell(new Vector2(j,i));
-    //        }
-    //    }
-
-    //    for (int i = 0; i < _nbrLines; i++)
-    //    {
-    //        for (int j = 0; j < _nbrColumns; j++)
-    //        {
-    //            GameObject cell = _grid[Mathf.FloorToInt(i), Mathf.FloorToInt(j)];
-
-    //            if (changeGrid[i,j] == 0)
-    //            {
-    //                cell.GetComponentInChildren<MeshRenderer>().sharedMaterial = _deadMaterial;
-    //                cell.tag = "Dead";
-    //            }
-
-    //            if (changeGrid[i, j] == 1)
-    //            {
-    //                cell.GetComponentInChildren<MeshRenderer>().sharedMaterial = _aliveMaterial;
-    //                cell.tag = "Alive";
-    //            }
-    //        }
-    //    }
-
-    //    Invoke("UpdateGame", 1/_speed);
-    //}
-
-    //private int UpdateCell(Vector2 pPosition)
-    //{
-    //    int neighborsAlive = GetNbrNeighborsAlive(pPosition);
-    //    GameObject cell = _grid[Mathf.FloorToInt(pPosition.y), Mathf.FloorToInt(pPosition.x)];
-
-    //    if (cell.tag == "Dead" && neighborsAlive == 3)
-    //    {
-    //        return 1;
-    //    } 
-    //    else if (cell.tag == "Alive" && (neighborsAlive < 2 || neighborsAlive > 3))
-    //    {
-    //        return 0;
-    //    }
-
-    //    return -1;
-    //}
-
-    //private int GetNbrNeighborsAlive(Vector2 pPosition)
-    //{
-    //    int neighborsAlive = 0;
-
-    //    for (int i = (int)(pPosition.y - 1); i <= (int)(pPosition.y + 1); i++)
-    //    {
-    //        for (int j = (int)(pPosition.x - 1); j <= (int)(pPosition.x + 1); j++)
-    //        {
-    //            if (!(pPosition.y == i && pPosition.x == j))
-    //            {
-    //                if (!(i < 0 || i >= _nbrLines || j < 0 || j >= _nbrColumns)) 
-    //                {
-    //                    if (_grid[i, j].tag == "Alive") 
-    //                    {
-    //                        neighborsAlive++;
-    //                    }
-    //                }
-    //            }
-    //        }
-    //    }
-    //    return neighborsAlive;
-    //}
 }
