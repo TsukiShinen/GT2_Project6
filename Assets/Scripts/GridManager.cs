@@ -96,6 +96,14 @@ public class GridManager : MonoBehaviour
         CameraManager.Instance.CameraInit();
     }
 
+    public void Init(JsonMap loadedMap)
+    {
+        _nbrLines = loadedMap.nbrLines;
+        _nbrColumns = loadedMap.nbrColumns;
+        CreateGrid(loadedMap.lstCell);
+        CameraManager.Instance.CameraInit();
+    }
+
     private void LoadSettings()
     {
         if (PlayerPrefs.HasKey("nbrLines")) { _nbrLines = PlayerPrefs.GetInt("nbrLines"); }
@@ -114,6 +122,22 @@ public class GridManager : MonoBehaviour
             {
                 GameObject gameObject = Instantiate(_cellPrefab, new Vector3(x, y, 0), new Quaternion(), transform);
                 Cell cell = new Cell(x, y, gameObject.GetComponentInChildren<MeshRenderer>(), false);
+                _lstCells[y * _nbrColumns + x] = cell;
+            }
+        }
+    }
+
+    void CreateGrid(JsonCell[] lstCell)
+    {
+        UnloadGrid();
+        _lstCells = new Cell[_nbrLines * _nbrColumns];
+
+        for (int y = 0; y < _nbrLines; y++)
+        {
+            for (int x = 0; x < _nbrColumns; x++)
+            {
+                GameObject gameObject = Instantiate(_cellPrefab, new Vector3(x, y, 0), new Quaternion(), transform);
+                Cell cell = new Cell(x, y, gameObject.GetComponentInChildren<MeshRenderer>(), lstCell[y * _nbrColumns + x].isAlive);
                 _lstCells[y * _nbrColumns + x] = cell;
             }
         }
@@ -176,6 +200,13 @@ public class GridManager : MonoBehaviour
     public void SaveButton()
     {
         SaveToJson("Last");
+    }
+
+    public void LoadButton(string name)
+    {
+        string data = ReadTextAsync("Last").Result;
+        JsonMap loadedMap = JsonUtility.FromJson<JsonMap>(data);
+        Init(loadedMap);
     }
     #endregion
 
@@ -305,6 +336,31 @@ public class GridManager : MonoBehaviour
         {
             await sourceStream.WriteAsync(encodedText, 0, encodedText.Length);
         };
+    }
+
+    private async Task<string> ReadTextAsync(string name)
+    {
+        string filePath = Application.persistentDataPath + "/Maps";
+        string path = Path.Combine(filePath, $"{name}.json");
+
+        using var sourceStream =
+            new FileStream(
+                path,
+                FileMode.Open, FileAccess.Read, FileShare.Read,
+                bufferSize: 4096, useAsync: true);
+
+        var sb = new StringBuilder();
+
+        byte[] buffer = new byte[0x1000];
+        int numRead;
+        while ((numRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+        {
+            string text = Encoding.Unicode.GetString(buffer, 0, numRead);
+            sb.Append(text);
+        }
+
+        Debug.Log(sb.ToString());
+        return sb.ToString();
     }
     #endregion
 }
