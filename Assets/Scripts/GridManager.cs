@@ -83,12 +83,14 @@ public class GridManager : MonoBehaviour
     private Cell[] _lstCells;
 
     private bool _running = false;
+    private bool _lastIsAlive = false;
     #endregion
 
     #region Init
 
     public void Init()
     {
+        _running = false;
         LoadSettings();
         CreateGrid();
         CameraManager.Instance.CameraInit();
@@ -156,7 +158,19 @@ public class GridManager : MonoBehaviour
         if (!(mouseCoords.x >= 0 && mouseCoords.x < _nbrColumns &&
               mouseCoords.y >= 0 && mouseCoords.y < _nbrLines)) { return; }
 
-        changeTile(mouseCoords);
+        _lastIsAlive =  changeTile(mouseCoords);
+    }
+    public void OnClickStay()
+    {
+        if (_running) { return; }
+
+        Vector2 mouseCoords = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        // Check if click is inside
+        if (!(mouseCoords.x >= 0 && mouseCoords.x < _nbrColumns &&
+              mouseCoords.y >= 0 && mouseCoords.y < _nbrLines)) { return; }
+
+        setTile(mouseCoords, _lastIsAlive);
     }
 
     public void SaveButton()
@@ -166,17 +180,27 @@ public class GridManager : MonoBehaviour
     #endregion
 
     #region Cells
-    private void changeTile(Vector2 tileCoord)
+    private bool changeTile(Vector2 tileCoord)
     {
         int index =  Mathf.FloorToInt(tileCoord.y) * _nbrColumns + Mathf.FloorToInt(tileCoord.x);
 
         _lstCells[index].mesh.sharedMaterial = (_lstCells[index].isAlive) ? _deadMaterial : _aliveMaterial;
         _lstCells[index].isAlive = !_lstCells[index].isAlive;
+        return _lstCells[index].isAlive;
     }
     private void changeTile(int index)
     {
         _lstCells[index].mesh.sharedMaterial = (_lstCells[index].isAlive) ? _deadMaterial : _aliveMaterial;
         _lstCells[index].isAlive = !_lstCells[index].isAlive;
+    }
+    private void setTile(Vector2 tileCoord, bool isAlive)
+    {
+        int index = Mathf.FloorToInt(tileCoord.y) * _nbrColumns + Mathf.FloorToInt(tileCoord.x);
+
+        if (_lstCells[index].isAlive == isAlive) { return; }
+
+        _lstCells[index].mesh.sharedMaterial = isAlive ? _aliveMaterial : _deadMaterial;
+        _lstCells[index].isAlive = isAlive;
     }
 
     private async void SimulationStep()

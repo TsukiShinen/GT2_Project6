@@ -10,6 +10,10 @@ public class InputManager : MonoBehaviour
         {
             GridManager.Instance.OnClick();
         }
+        else if (Input.GetMouseButton(0))
+        {
+            GridManager.Instance.OnClickStay();
+        }
         if (Input.GetKeyDown(KeyCode.L))
         {
             GridManager.Instance.StartGame();
