@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.IO;
 using UnityEngine;
+using System.Text;
 
-struct Cell
+public struct Cell
 {
     public int x;
     public int y;
@@ -23,6 +25,15 @@ struct Cell
     public string ToStringCell()
     {
         return "Position : " + y + "/" + x + " /// Is Alive : " + isAlive;
+    }
+
+    public JsonCell toJsonCell()
+    {
+        JsonCell cell = new JsonCell();
+        cell.x = x;
+        cell.y = y;
+        cell.isAlive = isAlive;
+        return cell;
     }
 }
 
@@ -85,6 +96,8 @@ public class GridManager : MonoBehaviour
         LoadSettings();
         CreateGrid();
         CameraManager.Instance.CameraInit();
+
+        SaveToJson("OUI");
     }
 
     private void LoadSettings()
@@ -218,6 +231,46 @@ public class GridManager : MonoBehaviour
             }
         }
         return neighborsAlive;
+    }
+    #endregion
+
+    #region Json
+    private string getJsonMap(string name)
+    {
+        JsonMap map = new JsonMap();
+        map.name = name;
+        map.nbrColumns = _nbrColumns;
+        map.nbrLines = _nbrLines;
+        map.lstCell = new JsonCell[_nbrColumns * _nbrColumns];
+        for (int i = 0; i < _lstCells.Length; i++)
+        {
+            map.lstCell[i] = _lstCells[i].toJsonCell();
+        }
+
+        return JsonUtility.ToJson(map);
+    }
+
+    private async Task SaveToJson(string name)
+    {
+        string json = getJsonMap(name);
+        string filePath = Application.persistentDataPath + "/Maps";
+
+        byte[] encodedText = Encoding.Unicode.GetBytes(json);
+
+        DirectoryInfo info = new DirectoryInfo(filePath);
+        if (!info.Exists)
+        {
+            info.Create();
+        }
+
+        string path = Path.Combine(filePath, name);
+
+        using (FileStream sourceStream = new FileStream(path,
+            FileMode.Append, FileAccess.Write, FileShare.None,
+            bufferSize: 4096, useAsync: true))
+        {
+            await sourceStream.WriteAsync(encodedText, 0, encodedText.Length);
+        };
     }
     #endregion
 }
