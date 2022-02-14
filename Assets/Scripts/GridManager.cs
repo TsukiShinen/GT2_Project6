@@ -86,18 +86,12 @@ public class GridManager : MonoBehaviour
     #endregion
 
     #region Init
-    private void Start()
-    {
-        Init();
-    }
 
-    private void Init()
+    public void Init()
     {
         LoadSettings();
         CreateGrid();
         CameraManager.Instance.CameraInit();
-
-        SaveToJson("OUI");
     }
 
     private void LoadSettings()
@@ -109,6 +103,7 @@ public class GridManager : MonoBehaviour
 
     void CreateGrid()
     {
+        UnloadGrid();
         _lstCells = new Cell[_nbrLines * _nbrColumns];
 
         for (int y = 0; y < _nbrLines; y++)
@@ -119,6 +114,16 @@ public class GridManager : MonoBehaviour
                 Cell cell = new Cell(x, y, gameObject.GetComponentInChildren<MeshRenderer>(), false);
                 _lstCells[y * _nbrColumns + x] = cell;
             }
+        }
+    }
+
+    void UnloadGrid()
+    {
+        if (_lstCells == null) { return; }
+
+        for (int i = 0; i < _lstCells.Length; i++)
+        {
+            Destroy(_lstCells[i].mesh.gameObject);
         }
     }
     #endregion
