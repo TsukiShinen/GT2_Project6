@@ -153,6 +153,11 @@ public class GridManager : MonoBehaviour
 
         changeTile(mouseCoords);
     }
+
+    public void SaveButton()
+    {
+        SaveToJson("Last");
+    }
     #endregion
 
     #region Cells
@@ -263,7 +268,7 @@ public class GridManager : MonoBehaviour
             info.Create();
         }
 
-        string path = Path.Combine(filePath, name);
+        string path = Path.Combine(filePath, $"{name}.json");
 
         using (FileStream sourceStream = new FileStream(path,
             FileMode.Append, FileAccess.Write, FileShare.None,
