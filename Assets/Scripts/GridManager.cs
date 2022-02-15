@@ -209,14 +209,15 @@ public class GridManager : MonoBehaviour
         setTile(mouseCoords, _lastIsAlive);
     }
 
-    public void SaveButton()
+    public async void SaveButton()
     {
-        SaveToJson("Last");
+        await SaveToJson("Last");
     }
 
-    public void LoadButton(string name)
+    public async void LoadButton()
     {
-        string data = ReadTextAsync("Last").Result;
+        var data = await LoadJson("Last");
+        Debug.Log(data);
         JsonMap loadedMap = JsonUtility.FromJson<JsonMap>(data);
         Init(loadedMap);
     }
@@ -325,6 +326,8 @@ public class GridManager : MonoBehaviour
     private bool isCellAliveNoneMode(int x, int y)
     {
         if (!(y < 0 || y >= _nbrLines || x < 0 || x >= _nbrColumns)) { return false; }
+        Debug.Log($"{_nbrLines} / {_nbrColumns}");
+        Debug.Log($"{x} / {y}");
         if (!_lstCells[y * _nbrColumns + x].isAlive) { return false; }
         return true;
     }
@@ -362,7 +365,7 @@ public class GridManager : MonoBehaviour
         string json = getJsonMap(name);
         string filePath = Application.persistentDataPath + "/Maps";
 
-        byte[] encodedText = Encoding.Unicode.GetBytes(json);
+        byte[] encodedText = Encoding.UTF8.GetBytes(json);
 
         DirectoryInfo info = new DirectoryInfo(filePath);
         if (!info.Exists)
@@ -375,35 +378,31 @@ public class GridManager : MonoBehaviour
         //CHECK IF FILE ALREADY EXIST
 
         using (FileStream sourceStream = new FileStream(path,
-            FileMode.Append, FileAccess.Write, FileShare.None,
+            FileMode.Create, FileAccess.Write, FileShare.Write,
             bufferSize: 4096, useAsync: true))
         {
             await sourceStream.WriteAsync(encodedText, 0, encodedText.Length);
         };
     }
 
-    private async Task<string> ReadTextAsync(string name)
+    public async Task<string> LoadJson(string name)
     {
-        string filePath = Application.persistentDataPath + "/Maps";
+        string filePath = UnityEngine.Application.persistentDataPath + "/Maps";
         string path = Path.Combine(filePath, $"{name}.json");
-
-        using var sourceStream =
-            new FileStream(
-                path,
-                FileMode.Open, FileAccess.Read, FileShare.Read,
-                bufferSize: 4096, useAsync: true);
-
+        using var sourceStream = new FileStream(
+            path,
+            FileMode.Open, FileAccess.Read, FileShare.Read,
+            bufferSize: 4096, useAsync: true);
         var sb = new StringBuilder();
 
         byte[] buffer = new byte[0x1000];
         int numRead;
         while ((numRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length)) != 0)
         {
-            string text = Encoding.Unicode.GetString(buffer, 0, numRead);
+            string text = Encoding.UTF8.GetString(buffer, 0, numRead);
             sb.Append(text);
         }
 
-        Debug.Log(sb.ToString());
         return sb.ToString();
     }
     #endregion
