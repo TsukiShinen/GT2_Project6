@@ -37,6 +37,12 @@ public struct Cell
     }
 }
 
+public enum GridMode
+{
+    None,
+    Continue
+}
+
 public class GridManager : MonoBehaviour
 {
     #region Singleton
@@ -75,6 +81,12 @@ public class GridManager : MonoBehaviour
     private Material _aliveMaterial;
     [SerializeField]
     private Material _deadMaterial;
+
+
+    [Header("Mode")]
+
+    [SerializeField]
+    private GridMode _gridMode;
     #endregion
 
     #region Private
@@ -108,7 +120,7 @@ public class GridManager : MonoBehaviour
     {
         if (PlayerPrefs.HasKey("nbrLines")) { _nbrLines = PlayerPrefs.GetInt("nbrLines"); }
         if (PlayerPrefs.HasKey("nbrColumns")) { _nbrColumns = PlayerPrefs.GetInt("nbrColumns"); }
-        if (PlayerPrefs.HasKey("speed")) { _stepPerSeconds = 1/PlayerPrefs.GetInt("speed"); }
+        if (PlayerPrefs.HasKey("speed")) { _stepPerSeconds = PlayerPrefs.GetInt("speed"); }
     }
 
     void CreateGrid()
@@ -160,7 +172,7 @@ public class GridManager : MonoBehaviour
 
         counter += Time.deltaTime;
 
-        if (!(counter >= _stepPerSeconds)) { return; }
+        if (!(counter >= 1 / (float)_stepPerSeconds)) { return; }
         counter = 0;
 
         SimulationStep();
@@ -285,17 +297,47 @@ public class GridManager : MonoBehaviour
             {
                 if (!(_lstCells[index].y == i && _lstCells[index].x == j))
                 {
-                    if (!(i < 0 || i >= _nbrLines || j < 0 || j >= _nbrColumns))
-                    {
-                        if (_lstCells[i * _nbrColumns + j].isAlive)
-                        {
-                            neighborsAlive++;
-                        }
-                    }
+                    neighborsAlive += isCellAlive(j, i) ? 1 : 0;
                 }
             }
         }
         return neighborsAlive;
+    }
+
+    private bool isCellAlive(int x, int y)
+    {
+        switch (_gridMode)
+        {
+            case GridMode.None:
+                return isCellAliveNoneMode(x, y);
+                break;
+            case GridMode.Continue:
+                return isCellAliveContinueMode(x, y);
+                break;
+            default:
+                break;
+        }
+
+
+        return false;
+    }
+
+    private bool isCellAliveNoneMode(int x, int y)
+    {
+        if (!(y < 0 || y >= _nbrLines || x < 0 || x >= _nbrColumns)) { return false; }
+        if (!_lstCells[y * _nbrColumns + x].isAlive) { return false; }
+        return true;
+    }
+
+    private bool isCellAliveContinueMode(int x, int y)
+    {
+        if (y < 0) { y += _nbrLines; }
+        if (y >= _nbrLines) { y -= _nbrLines; }
+        if (x < 0) { x += _nbrColumns; }
+        if (x >= _nbrLines) { x -= _nbrColumns; }
+
+        if (!_lstCells[y * _nbrColumns + x].isAlive) { return false; }
+        return true;
     }
     #endregion
 
