@@ -149,7 +149,14 @@ public class GridManager : MonoBehaviour
             for (int x = 0; x < _nbrColumns; x++)
             {
                 GameObject gameObject = Instantiate(_cellPrefab, new Vector3(x, y, 0), new Quaternion(), transform);
+                Debug.Log(lstCell[y * _nbrColumns + x].isAlive);
                 Cell cell = new Cell(x, y, gameObject.GetComponentInChildren<MeshRenderer>(), lstCell[y * _nbrColumns + x].isAlive);
+
+                if (cell.isAlive)
+                {
+                    cell.mesh.sharedMaterial = _aliveMaterial;
+                }
+
                 _lstCells[y * _nbrColumns + x] = cell;
             }
         }
@@ -217,7 +224,6 @@ public class GridManager : MonoBehaviour
     public async void LoadButton()
     {
         var data = await LoadJson("Last");
-        Debug.Log(data);
         JsonMap loadedMap = JsonUtility.FromJson<JsonMap>(data);
         Init(loadedMap);
     }
@@ -311,10 +317,8 @@ public class GridManager : MonoBehaviour
         {
             case GridMode.None:
                 return isCellAliveNoneMode(x, y);
-                break;
             case GridMode.Continue:
                 return isCellAliveContinueMode(x, y);
-                break;
             default:
                 break;
         }
@@ -325,9 +329,7 @@ public class GridManager : MonoBehaviour
 
     private bool isCellAliveNoneMode(int x, int y)
     {
-        if (!(y < 0 || y >= _nbrLines || x < 0 || x >= _nbrColumns)) { return false; }
-        Debug.Log($"{_nbrLines} / {_nbrColumns}");
-        Debug.Log($"{x} / {y}");
+        if (y < 0 || y >= _nbrLines || x < 0 || x >= _nbrColumns) { return false; }
         if (!_lstCells[y * _nbrColumns + x].isAlive) { return false; }
         return true;
     }
