@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using TMPro;
 
 public class CameraManager : MonoBehaviour
 {
@@ -22,6 +24,9 @@ public class CameraManager : MonoBehaviour
     }
     #endregion
 
+    [SerializeField]
+    private TMP_InputField InputField;
+
     public float camSpeed = 20.0f;
 
     public void CameraInit()
@@ -39,6 +44,8 @@ public class CameraManager : MonoBehaviour
 
     void Update()
     {
+        if (EventSystem.current.currentSelectedGameObject == InputField.gameObject) { return; }
+        
         float InputX = Input.GetAxisRaw("Horizontal");
         float InputY = Input.GetAxisRaw("Vertical");
         float InputZ = Input.mouseScrollDelta.y;

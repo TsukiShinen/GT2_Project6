@@ -372,6 +372,8 @@ public class GridManager : MonoBehaviour
 
         string path = Path.Combine(filePath, $"{name}.json");
 
+        //CHECK IF FILE ALREADY EXIST
+
         using (FileStream sourceStream = new FileStream(path,
             FileMode.Append, FileAccess.Write, FileShare.None,
             bufferSize: 4096, useAsync: true))
