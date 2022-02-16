@@ -414,6 +414,10 @@ public class GridManager : MonoBehaviour
     {
         string filePath = Application.persistentDataPath + "/Maps";
         string path = Path.Combine(filePath, name);
+
+
+        Debug.Log(path);
+
         using var sourceStream = new FileStream(
             path,
             FileMode.Open, FileAccess.Read, FileShare.Read,

@@ -34,9 +34,7 @@ public class MainMenu : MonoBehaviour
     public void LoadButton()
     {
         filesList.Clear();
-        Debug.Log("List cleared");
         filesDropdown.ClearOptions();
-        Debug.Log("Dd cleared");
         filesDropdown.RefreshShownValue();
         string path = Application.persistentDataPath + "/Maps";
         string[] jsonFilesPaths = Directory.GetFiles(@path, "*.json");
@@ -49,8 +47,8 @@ public class MainMenu : MonoBehaviour
         {
             filesList.Add(Path.GetFileName(file));
         }
+        selectedFilePath = filesList[filesDropdown.value];
         filesDropdown.AddOptions(filesList);
-        Debug.Log("Items added");
         filesDropdown.RefreshShownValue();
     }
 
