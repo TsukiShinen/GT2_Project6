@@ -87,6 +87,8 @@ public class GridManager : MonoBehaviour
     private Material _deadMaterial;
     [SerializeField]
     private MeshFilter _meshFilter;
+    [SerializeField]
+    private MeshRenderer _meshRenderer;
 
     [Header("Mode")]
 
@@ -104,6 +106,7 @@ public class GridManager : MonoBehaviour
     private float counter = 0;
 
     private Cell[] _lstCells;
+    private Color[] _lstCellsColor;
 
     private bool _running = false;
     private bool _lastIsAlive = false;
@@ -114,7 +117,7 @@ public class GridManager : MonoBehaviour
     {
         _running = false;
         LoadSettings();
-        //CreateGrid();
+        CreateGrid();
         CameraManager.Instance.CameraInit();
         DrawMesh();
     }
@@ -157,6 +160,16 @@ public class GridManager : MonoBehaviour
                 _lstCells[y * _nbrColumns + x] = cell;
             }
         }
+
+        _lstCellsColor = new Color[_nbrLines * _nbrColumns];
+        Texture2D texture = new Texture2D(_nbrColumns, _nbrLines);
+        for (int i = 0; i < _lstCellsColor.Length; i++)
+        {
+            _lstCellsColor[i] = Color.black;
+        }
+        texture.SetPixels(_lstCellsColor);
+        texture.Apply();
+        _meshRenderer.sharedMaterial.mainTexture = texture;
     }
 
     void CreateGrid(JsonCell[] lstCell)
@@ -369,6 +382,15 @@ public class GridManager : MonoBehaviour
 
         _lstCells[index].mesh.sharedMaterial = (_lstCells[index].isAlive) ? _deadMaterial : _aliveMaterial;
         _lstCells[index].isAlive = !_lstCells[index].isAlive;
+
+        _lstCellsColor[index] = Color.white;
+        Texture2D texture = new Texture2D(_nbrColumns, _nbrLines);
+        texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        texture.SetPixels(_lstCellsColor);
+        texture.Apply();
+        _meshRenderer.sharedMaterial.mainTexture = texture;
+
         return _lstCells[index].isAlive;
     }
     private void ChangeCellAt(int index)
