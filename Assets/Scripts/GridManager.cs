@@ -85,6 +85,8 @@ public class GridManager : MonoBehaviour
     private Material _aliveMaterial;
     [SerializeField]
     private Material _deadMaterial;
+    [SerializeField]
+    private MeshFilter _meshFilter;
 
     [Header("Mode")]
 
@@ -112,8 +114,9 @@ public class GridManager : MonoBehaviour
     {
         _running = false;
         LoadSettings();
-        CreateGrid();
+        //CreateGrid();
         CameraManager.Instance.CameraInit();
+        DrawMesh();
     }
 
     public void Init(JsonMap loadedMap)
@@ -199,6 +202,11 @@ public class GridManager : MonoBehaviour
         counter = 0;
 
         SimulationStep();
+    }
+
+    private void DrawMesh()
+    {
+        _meshFilter.sharedMesh = MeshGenerator.GenerateMesh(_nbrColumns + 1, _nbrLines + 1).CreateMesh();
     }
 
     #region Public functions

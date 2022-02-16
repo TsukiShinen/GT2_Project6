@@ -18,7 +18,7 @@ public class MeshGenerator
 
                 if (x < width - 1 && y < height - 1) {
                     meshData.AddTriangle(vertexIndex, vertexIndex + width + 1, vertexIndex + width);
-                    meshData.AddTriangle(vertexIndex + width + 1, vertexIndex, vertexIndex + width);
+                    meshData.AddTriangle(vertexIndex + width + 1, vertexIndex, vertexIndex + 1);
                 }
 
                 vertexIndex++;
@@ -46,15 +46,16 @@ public class MeshData
 
     public void AddTriangle(int a, int b, int c)
     {
-        triangles[triangleIndex] = a;
+        triangles[triangleIndex] = c;
         triangles[triangleIndex+1] = b;
-        triangles[triangleIndex+2] = c;
+        triangles[triangleIndex+2] = a;
         triangleIndex += 3;
     }
 
     public Mesh CreateMesh()
     {
         Mesh mesh = new Mesh();
+        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.uv = uvs;
