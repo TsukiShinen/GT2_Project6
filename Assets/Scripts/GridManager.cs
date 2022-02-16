@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.IO;
 using UnityEngine;
 using System.Text;
+using System.Threading;
+using System;
 
 public struct Cell
 {
@@ -255,22 +257,19 @@ public class GridManager : MonoBehaviour
 
     private async void SimulationStep()
     {
-        List<Task<int>> tasks = new List<Task<int>>();
-        for (int i = 0; i < _lstCells.Length; i++)
+        List<Task<List<int>>> tasks = new List<Task<List<int>>>();
+        List<int> lstIndexToModify = new List<int>();
+        for (int i = 0; i < Environment.ProcessorCount; i++)
         {
             var index = i;
-            tasks.Add(Task.Run(() => UpdateCell(index)));
+            tasks.Add(Task.Run(() => getTaskCell(_lstCells.Length * index / Environment.ProcessorCount, _lstCells.Length * (index + 1) / Environment.ProcessorCount)));
         }
-        List<int> lstIndexToModify = new List<int>();
         while (tasks.Count > 0)
         {
             var finishedTask = await Task.WhenAny(tasks);
 
-            if (finishedTask.Result != -1)
-            {
-                lstIndexToModify.Add(finishedTask.Result);
-            }
-
+            lstIndexToModify.AddRange(finishedTask.Result);
+            
             tasks.Remove(finishedTask);
         }
 
@@ -278,6 +277,20 @@ public class GridManager : MonoBehaviour
         {
             changeTile(index);
         }
+    }
+
+    private List<int> getTaskCell(int from, int to)
+    {
+        Debug.Log($"{from} / {to}");
+        List<int> lstIndexToModify = new List<int>();
+        for (int i = from; i < to; i++)
+        {
+            int index = UpdateCell(i);
+            if (index != -1)
+                lstIndexToModify.Add(index);
+        }
+
+        return lstIndexToModify;
     }
 
     private int UpdateCell(int index)
