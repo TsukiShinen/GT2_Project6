@@ -36,9 +36,10 @@ public class MainMenu : MonoBehaviour
         filesList.Clear();
         filesDropdown.ClearOptions();
         filesDropdown.RefreshShownValue();
-        string path = Application.persistentDataPath + "/Maps";
+        string path = Application.persistentDataPath;
         string[] jsonFilesPaths = Directory.GetFiles(@path, "*.json");
         string[] pngFilesPaths = Directory.GetFiles(@path, "*.png");
+        if(jsonFilesPaths.Length == 0 && pngFilesPaths.Length == 0) { return; }
         foreach (string file in jsonFilesPaths)
         {
             filesList.Add(Path.GetFileName(file));
@@ -54,7 +55,7 @@ public class MainMenu : MonoBehaviour
 
     public void DropdownSelect(int index)
     {
-        string filePath = Application.persistentDataPath + "/Maps";
+        string filePath = Application.persistentDataPath;
         selectedFilePath = filePath + "/" + filesDropdown.options[filesDropdown.value].text;
     }
 

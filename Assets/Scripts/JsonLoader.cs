@@ -10,17 +10,10 @@ public class JsonLoader
 {
     public static async Task SaveMap(string name)
     {
-        // Get the byte to write
         string json = JsonUtility.ToJson(GridManager.Instance.GetJsonMap(name));
         byte[] encodedText = Encoding.UTF8.GetBytes(json);
 
-        // Get the path (and create the folder if not created)
-        string filePath = Application.persistentDataPath + "/Maps";
-        DirectoryInfo info = new DirectoryInfo(filePath);
-        if (!info.Exists)
-        {
-            info.Create();
-        }
+        string filePath = Application.persistentDataPath;
         string path = Path.Combine(filePath, $"{name}.json");
 
         // Write the file
@@ -34,7 +27,7 @@ public class JsonLoader
 
     public static async Task<string> LoadMap(string name)
     {
-        string filePath = Application.persistentDataPath + "/Maps";
+        string filePath = Application.persistentDataPath;
         string path = Path.Combine(filePath, name);
 
         using var sourceStream = new FileStream(
