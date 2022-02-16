@@ -6,6 +6,7 @@ using UnityEngine;
 using System.Text;
 using System.Threading;
 using System;
+using TMPro;
 
 public struct Cell
 {
@@ -66,6 +67,7 @@ public class GridManager : MonoBehaviour
 
     #region Show in Editor
     [Header("Grid Parameters")]
+
     [SerializeField]
     [Range(1, 50)]
     private int _nbrColumns = 10;
@@ -84,11 +86,16 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     private Material _deadMaterial;
 
-
     [Header("Mode")]
 
     [SerializeField]
     private GridMode _gridMode;
+
+    [Header("Mode")]
+
+    [SerializeField]
+    TMP_InputField inputField;
+
     #endregion
 
     #region Private
@@ -114,6 +121,9 @@ public class GridManager : MonoBehaviour
     {
         _nbrLines = loadedMap.nbrLines;
         _nbrColumns = loadedMap.nbrColumns;
+        PlayerPrefs.SetInt("nbrLines", _nbrLines);
+        PlayerPrefs.SetInt("nbrColumns", _nbrColumns);
+        PlayerPrefs.Save();
         CreateGrid(loadedMap.lstCell);
         CameraManager.Instance.CameraInit();
     }
@@ -219,12 +229,12 @@ public class GridManager : MonoBehaviour
 
     public async void SaveButton()
     {
-        await SaveToJson("Last");
+        await SaveToJson(inputField.text);
     }
 
     public async void LoadButton()
     {
-        var data = await LoadJson("Last");
+        var data = await LoadJson(MainMenu.Instance.selectedFilePath);
         JsonMap loadedMap = JsonUtility.FromJson<JsonMap>(data);
         Init(loadedMap);
     }
@@ -401,8 +411,8 @@ public class GridManager : MonoBehaviour
 
     public async Task<string> LoadJson(string name)
     {
-        string filePath = UnityEngine.Application.persistentDataPath + "/Maps";
-        string path = Path.Combine(filePath, $"{name}.json");
+        string filePath = Application.persistentDataPath + "/Maps";
+        string path = Path.Combine(filePath, name);
         using var sourceStream = new FileStream(
             path,
             FileMode.Open, FileAccess.Read, FileShare.Read,
