@@ -108,7 +108,6 @@ public class GridManager : MonoBehaviour
     #endregion
 
     #region Init
-
     public void Init()
     {
         _running = false;
@@ -119,11 +118,8 @@ public class GridManager : MonoBehaviour
 
     public void Init(JsonMap loadedMap)
     {
-        _nbrLines = loadedMap.nbrLines;
-        _nbrColumns = loadedMap.nbrColumns;
-        PlayerPrefs.SetInt("nbrLines", _nbrLines);
-        PlayerPrefs.SetInt("nbrColumns", _nbrColumns);
-        PlayerPrefs.Save();
+        _running = false;
+        LoadSettings(loadedMap);
         CreateGrid(loadedMap.lstCell);
         CameraManager.Instance.CameraInit();
     }
@@ -133,6 +129,15 @@ public class GridManager : MonoBehaviour
         if (PlayerPrefs.HasKey("nbrLines")) { _nbrLines = PlayerPrefs.GetInt("nbrLines"); }
         if (PlayerPrefs.HasKey("nbrColumns")) { _nbrColumns = PlayerPrefs.GetInt("nbrColumns"); }
         if (PlayerPrefs.HasKey("speed")) { _stepPerSeconds = PlayerPrefs.GetInt("speed"); }
+    }
+
+    private void LoadSettings(JsonMap loadedMap)
+    {
+        _nbrLines = loadedMap.nbrLines;
+        _nbrColumns = loadedMap.nbrColumns;
+        PlayerPrefs.SetInt("nbrLines", _nbrLines);
+        PlayerPrefs.SetInt("nbrColumns", _nbrColumns);
+        PlayerPrefs.Save();
     }
 
     void CreateGrid()
@@ -212,7 +217,7 @@ public class GridManager : MonoBehaviour
         if (!(mouseCoords.x >= 0 && mouseCoords.x < _nbrColumns &&
               mouseCoords.y >= 0 && mouseCoords.y < _nbrLines)) { return; }
 
-        _lastIsAlive =  changeTile(mouseCoords);
+        _lastIsAlive =  ChangeCellAt(mouseCoords);
     }
     public void OnClickStay()
     {
@@ -224,97 +229,80 @@ public class GridManager : MonoBehaviour
         if (!(mouseCoords.x >= 0 && mouseCoords.x < _nbrColumns &&
               mouseCoords.y >= 0 && mouseCoords.y < _nbrLines)) { return; }
 
-        setTile(mouseCoords, _lastIsAlive);
+        SetCellAt(mouseCoords, _lastIsAlive);
     }
 
     public async void SaveButton()
     {
-        await SaveToJson(inputField.text);
+        await JsonLoader.SaveMap(inputField.text);
     }
 
     public async void LoadButton()
     {
-        var data = await LoadJson(MainMenu.Instance.selectedFilePath);
+        var data = await JsonLoader.LoadMap(MainMenu.Instance.selectedFilePath);
         JsonMap loadedMap = JsonUtility.FromJson<JsonMap>(data);
         Init(loadedMap);
     }
     #endregion
 
     #region Cells
-    private bool changeTile(Vector2 tileCoord)
-    {
-        int index =  Mathf.FloorToInt(tileCoord.y) * _nbrColumns + Mathf.FloorToInt(tileCoord.x);
-
-        _lstCells[index].mesh.sharedMaterial = (_lstCells[index].isAlive) ? _deadMaterial : _aliveMaterial;
-        _lstCells[index].isAlive = !_lstCells[index].isAlive;
-        return _lstCells[index].isAlive;
-    }
-    private void changeTile(int index)
-    {
-        _lstCells[index].mesh.sharedMaterial = (_lstCells[index].isAlive) ? _deadMaterial : _aliveMaterial;
-        _lstCells[index].isAlive = !_lstCells[index].isAlive;
-    }
-    private void setTile(Vector2 tileCoord, bool isAlive)
-    {
-        int index = Mathf.FloorToInt(tileCoord.y) * _nbrColumns + Mathf.FloorToInt(tileCoord.x);
-
-        if (_lstCells[index].isAlive == isAlive) { return; }
-
-        _lstCells[index].mesh.sharedMaterial = isAlive ? _aliveMaterial : _deadMaterial;
-        _lstCells[index].isAlive = isAlive;
-    }
-
     private async void SimulationStep()
     {
-        List<Task<List<int>>> tasks = new List<Task<List<int>>>();
-        List<int> lstIndexToModify = new List<int>();
+        // Start the check to update on cells (distributed on each cores)
+        List<Task<List<int>>> cellUpdate = new List<Task<List<int>>>();
         for (int i = 0; i < Environment.ProcessorCount; i++)
         {
             var index = i;
-            tasks.Add(Task.Run(() => getTaskCell(_lstCells.Length * index / Environment.ProcessorCount, _lstCells.Length * (index + 1) / Environment.ProcessorCount)));
+            cellUpdate.Add(Task.Run(() => getTaskCell(_lstCells.Length * index / Environment.ProcessorCount, _lstCells.Length * (index + 1) / Environment.ProcessorCount)));
         }
-        while (tasks.Count > 0)
-        {
-            var finishedTask = await Task.WhenAny(tasks);
 
-            lstIndexToModify.AddRange(finishedTask.Result);
+        // Get the cell who need update
+        List<int> lstCellToUpdate = new List<int>();
+        while (cellUpdate.Count > 0)
+        {
+            var finishedTask = await Task.WhenAny(cellUpdate);
+
+            lstCellToUpdate.AddRange(finishedTask.Result);
             
-            tasks.Remove(finishedTask);
+            cellUpdate.Remove(finishedTask);
         }
 
-        foreach (int index in lstIndexToModify)
+        // Change the cells
+        foreach (int index in lstCellToUpdate)
         {
-            changeTile(index);
+            ChangeCellAt(index);
         }
     }
 
     private List<int> getTaskCell(int from, int to)
     {
         Debug.Log($"{from} / {to}");
-        List<int> lstIndexToModify = new List<int>();
-        for (int i = from; i < to; i++)
+        List<int> lstIndexToUpdate = new List<int>();
+        for (int index = from; index < to; index++)
         {
-            int index = UpdateCell(i);
-            if (index != -1)
-                lstIndexToModify.Add(index);
+            
+            if (NeedUpdate(index))
+                lstIndexToUpdate.Add(index);
         }
 
-        return lstIndexToModify;
+        return lstIndexToUpdate;
     }
 
-    private int UpdateCell(int index)
+    // Take the current cell, and return if an update is needed
+    private bool NeedUpdate(int index)
     {
+        // Get Neightbor
         int neighborsAlive = GetNbrNeighborsAlive(index);
-        if (!_lstCells[index].isAlive && neighborsAlive == 3)
+
+        // Check the rule if need an update
+        if ((!_lstCells[index].isAlive && neighborsAlive == 3) ||
+            (_lstCells[index].isAlive && (neighborsAlive < 2 || neighborsAlive > 3)))
         {
-            return index;
-        } 
-        else if (_lstCells[index].isAlive && (neighborsAlive < 2 || neighborsAlive > 3))
-        {
-            return index;
+            return true;
         }
 
-        return -1;
+        // Return none
+        return false;
     }
 
     private int GetNbrNeighborsAlive(int index)
@@ -366,10 +354,34 @@ public class GridManager : MonoBehaviour
         if (!_lstCells[y * _nbrColumns + x].isAlive) { return false; }
         return true;
     }
+
+    private bool ChangeCellAt(Vector2 tileCoord)
+    {
+        int index = Mathf.FloorToInt(tileCoord.y) * _nbrColumns + Mathf.FloorToInt(tileCoord.x);
+
+        _lstCells[index].mesh.sharedMaterial = (_lstCells[index].isAlive) ? _deadMaterial : _aliveMaterial;
+        _lstCells[index].isAlive = !_lstCells[index].isAlive;
+        return _lstCells[index].isAlive;
+    }
+    private void ChangeCellAt(int index)
+    {
+        _lstCells[index].mesh.sharedMaterial = (_lstCells[index].isAlive) ? _deadMaterial : _aliveMaterial;
+        _lstCells[index].isAlive = !_lstCells[index].isAlive;
+    }
+
+    private void SetCellAt(Vector2 tileCoord, bool isAlive)
+    {
+        int index = Mathf.FloorToInt(tileCoord.y) * _nbrColumns + Mathf.FloorToInt(tileCoord.x);
+
+        if (_lstCells[index].isAlive == isAlive) { return; }
+
+        _lstCells[index].mesh.sharedMaterial = isAlive ? _aliveMaterial : _deadMaterial;
+        _lstCells[index].isAlive = isAlive;
+    }
     #endregion
 
     #region Json
-    private string getJsonMap(string name)
+    public JsonMap GetJsonMap(string name)
     {
         JsonMap map = new JsonMap();
         map.name = name;
@@ -380,58 +392,8 @@ public class GridManager : MonoBehaviour
         {
             map.lstCell[i] = _lstCells[i].toJsonCell();
         }
-
-        return JsonUtility.ToJson(map);
-    }
-
-    private async Task SaveToJson(string name)
-    {
-        string json = getJsonMap(name);
-        string filePath = Application.persistentDataPath + "/Maps";
-
-        byte[] encodedText = Encoding.UTF8.GetBytes(json);
-
-        DirectoryInfo info = new DirectoryInfo(filePath);
-        if (!info.Exists)
-        {
-            info.Create();
-        }
-
-        string path = Path.Combine(filePath, $"{name}.json");
-
-        //CHECK IF FILE ALREADY EXIST
-
-        using (FileStream sourceStream = new FileStream(path,
-            FileMode.Create, FileAccess.Write, FileShare.Write,
-            bufferSize: 4096, useAsync: true))
-        {
-            await sourceStream.WriteAsync(encodedText, 0, encodedText.Length);
-        };
-    }
-
-    public async Task<string> LoadJson(string name)
-    {
-        string filePath = Application.persistentDataPath + "/Maps";
-        string path = Path.Combine(filePath, name);
-
-
-        Debug.Log(path);
-
-        using var sourceStream = new FileStream(
-            path,
-            FileMode.Open, FileAccess.Read, FileShare.Read,
-            bufferSize: 4096, useAsync: true);
-        var sb = new StringBuilder();
-
-        byte[] buffer = new byte[0x1000];
-        int numRead;
-        while ((numRead = await sourceStream.ReadAsync(buffer, 0, buffer.Length)) != 0)
-        {
-            string text = Encoding.UTF8.GetString(buffer, 0, numRead);
-            sb.Append(text);
-        }
-
-        return sb.ToString();
+        
+        return map;
     }
     #endregion
 }
