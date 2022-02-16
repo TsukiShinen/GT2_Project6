@@ -151,7 +151,6 @@ public class GridManager : MonoBehaviour
             for (int x = 0; x < _nbrColumns; x++)
             {
                 GameObject gameObject = Instantiate(_cellPrefab, new Vector3(x, y, 0), new Quaternion(), transform);
-                Debug.Log(lstCell[y * _nbrColumns + x].isAlive);
                 Cell cell = new Cell(x, y, gameObject.GetComponentInChildren<MeshRenderer>(), lstCell[y * _nbrColumns + x].isAlive);
 
                 if (cell.isAlive)
