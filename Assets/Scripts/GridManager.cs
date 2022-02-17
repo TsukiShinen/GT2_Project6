@@ -391,9 +391,8 @@ public class GridManager : MonoBehaviour
             return lstIndexToUpdate;
         }
 
-        // Take the current cell, and return if an update is needed
-        private bool NeedUpdate(int index)
-        {
+        private bool NeedUpdate(int index) // Return true if a cell needs to be updated
+    {
             // Get Neightbor
             int neighborsAlive = GetNbrNeighborsAlive(index);
 
