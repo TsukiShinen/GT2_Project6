@@ -36,6 +36,7 @@ public class OptionsMenu : MonoBehaviour
     public void SetSpeed(float speed)
     {
         PlayerPrefs.SetInt("speed", (int)speed);
+        GridManager.Instance.SetSpeed(speed);
         PlayerPrefs.Save();
     }
 

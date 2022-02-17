@@ -16,7 +16,7 @@ public class InputManager : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.L))
         {
-            GridManager.Instance.StartGame();
+            GridManager.Instance.PlayButton();
         }
     }
 }

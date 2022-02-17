@@ -194,7 +194,7 @@ public class GridManager : MonoBehaviour
         {
             for (int x = 0; x < _nbrColumns; x++)
             {
-                Cell cell = new Cell(x, y, false);
+                Cell cell = new Cell(x, y, lstCell[y * _nbrColumns + x].isAlive);
                 _lstCells[y * _nbrColumns + x] = cell;
                 _lstCellsColor[y * _nbrColumns + x] = lstCell[y * _nbrColumns + x].isAlive ? Color.white : Color.black;
             }
@@ -258,12 +258,12 @@ public class GridManager : MonoBehaviour
     }
 
     #region Public functions
-    public void StartGame()
+    public void PlayButton()
     {
         _running = true;
     }
 
-    public void StopGame()
+    public void PauseButton()
     {
         _running = false;
     }
@@ -337,6 +337,11 @@ public class GridManager : MonoBehaviour
         texture.SetPixels(_lstCellsColor);
         texture.Apply();
         return texture;
+    }
+
+    public void SetSpeed(float speed)
+    {
+        _stepPerSeconds = (int)speed;
     }
     #endregion
 
