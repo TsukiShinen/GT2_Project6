@@ -123,6 +123,8 @@ public class GridManager : MonoBehaviour
         _running = false;
         LoadSettings(loadedMap);
         CreateGrid(loadedMap.lstCell);
+        Debug.Log(_nbrLines);
+        Debug.Log(_nbrColumns);
         CameraManager.Instance.CameraInit();
     }
 
@@ -160,7 +162,7 @@ public class GridManager : MonoBehaviour
             }
         }
 
-        ReChargeTexture();
+        RechargeTexture();
     }
 
     void CreateGrid(JsonCell[] lstCell)
@@ -181,10 +183,10 @@ public class GridManager : MonoBehaviour
             }
         }
 
-        ReChargeTexture();
+        RechargeTexture();
     }
 
-    void ReChargeTexture()
+    void RechargeTexture()
     {
         Texture2D texture = new Texture2D(_nbrColumns, _nbrLines);
         texture.filterMode = FilterMode.Point;
@@ -235,8 +237,9 @@ public class GridManager : MonoBehaviour
               mouseCoords.y >= 0 && mouseCoords.y < _nbrLines)) { return; }
 
         _lastIsAlive =  ChangeCellAt(mouseCoords);
-        ReChargeTexture();
+        RechargeTexture();
     }
+
     public void OnClickStay()
     {
         if (_running) { return; }
@@ -248,7 +251,7 @@ public class GridManager : MonoBehaviour
               mouseCoords.y >= 0 && mouseCoords.y < _nbrLines)) { return; }
 
         SetCellAt(mouseCoords, _lastIsAlive);
-        ReChargeTexture();
+        RechargeTexture();
     }
 
     public async void SaveButton()
@@ -291,7 +294,7 @@ public class GridManager : MonoBehaviour
         {
             ChangeCellAt(index);
         }
-        ReChargeTexture();
+        RechargeTexture();
     }
 
     private List<int> getTaskCell(int from, int to)
@@ -407,7 +410,7 @@ public class GridManager : MonoBehaviour
         map.name = name;
         map.nbrColumns = _nbrColumns;
         map.nbrLines = _nbrLines;
-        map.lstCell = new JsonCell[_nbrColumns * _nbrColumns];
+        map.lstCell = new JsonCell[_nbrLines * _nbrColumns];
         for (int i = 0; i < _lstCells.Length; i++)
         {
             map.lstCell[i] = _lstCells[i].toJsonCell();

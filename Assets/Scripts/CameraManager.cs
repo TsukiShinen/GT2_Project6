@@ -6,7 +6,6 @@ using TMPro;
 
 public class CameraManager : MonoBehaviour
 {
-
     #region Singleton
     public static CameraManager Instance;
 
@@ -16,6 +15,7 @@ public class CameraManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(this);
+            Init();
         }
         else
         {
@@ -24,11 +24,18 @@ public class CameraManager : MonoBehaviour
     }
     #endregion
 
+    #region variables
+
     [SerializeField]
     private TMP_InputField InputField;
 
-    public float camSpeed = 20.0f;
+    public float camSpeed = 0;
 
+    #endregion
+    private void Init()
+    {
+        camSpeed = (PlayerPrefs.GetInt("nbrLines") + PlayerPrefs.GetInt("nbrColumns"))*2;
+    }
     public void CameraInit()
     {
         Vector3 camPos;
@@ -36,12 +43,12 @@ public class CameraManager : MonoBehaviour
         camPos.y = PlayerPrefs.GetInt("nbrLines")/2;
         camPos.z = -5;
 
-        GetComponent<Camera>().orthographicSize = PlayerPrefs.GetInt("nbrLines")/2;
+        int value = PlayerPrefs.GetInt("nbrLines") > PlayerPrefs.GetInt("nbrColumns") ? PlayerPrefs.GetInt("nbrLines") : PlayerPrefs.GetInt("nbrColumns");
+        GetComponent<Camera>().orthographicSize = value / 2;
 
         transform.position = camPos;
 
     }
-
     void Update()
     {
         if (EventSystem.current.currentSelectedGameObject == InputField.gameObject) { return; }
@@ -50,7 +57,7 @@ public class CameraManager : MonoBehaviour
         float InputY = Input.GetAxisRaw("Vertical");
         float InputZ = Input.mouseScrollDelta.y;
 
-        transform.Translate(new Vector3(InputX, InputY, 0) * camSpeed * Time.deltaTime);
+        transform.Translate(new Vector3(InputX * GetComponent<Camera>().orthographicSize, InputY * GetComponent<Camera>().orthographicSize, 0) * Time.deltaTime);
         GetComponent<Camera>().orthographicSize -= InputZ * camSpeed * Time.deltaTime;
     }
 }
