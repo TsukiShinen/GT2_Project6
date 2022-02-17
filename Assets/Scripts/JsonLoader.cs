@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +6,7 @@ using UnityEngine;
 
 public class JsonLoader
 {
-    public static async Task SaveMap(string name)
+    public static async Task SaveMapToJson(string name)
     {
         string json = JsonUtility.ToJson(GridManager.Instance.GetJsonMap(name));
         byte[] encodedText = Encoding.UTF8.GetBytes(json);
@@ -25,7 +23,7 @@ public class JsonLoader
         };
     }
 
-    public static async Task<string> LoadMap(string name)
+    public static async Task<string> LoadMapFromJson(string name)
     {
         string filePath = Application.persistentDataPath;
         string path = Path.Combine(filePath, name);
@@ -47,7 +45,6 @@ public class JsonLoader
         return sb.ToString();
     }
 }
-
 
 [Serializable]
 public class JsonMap

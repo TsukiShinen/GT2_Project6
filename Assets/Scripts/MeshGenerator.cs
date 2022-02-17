@@ -13,8 +13,8 @@ public class MeshGenerator
         {
             for (int x = 0; x < width; x++)
             {
-                meshData.vertices[vertexIndex] = new Vector3(x, y, 0);
-                meshData.uvs[vertexIndex] = new Vector2(x/(float)(width-1), y/(float)(height-1));
+                meshData.m_vertices[vertexIndex] = new Vector3(x, y, 0);
+                meshData.m_uvs[vertexIndex] = new Vector2(x/(float)(width-1), y/(float)(height-1));
 
                 if (x < width - 1 && y < height - 1) {
                     meshData.AddTriangle(vertexIndex, vertexIndex + width + 1, vertexIndex + width);
@@ -31,34 +31,34 @@ public class MeshGenerator
 
 public class MeshData
 {
-    public Vector3[] vertices;
-    public int[] triangles;
-    public Vector2[] uvs;
+    public Vector3[] m_vertices;
+    public int[] m_triangles;
+    public Vector2[] m_uvs;
 
-    int triangleIndex;
+    int _triangleIndex;
 
     public MeshData(int meshWidth, int meshHeight)
     {
-        vertices = new Vector3[meshWidth * meshHeight];
-        uvs = new Vector2[meshWidth * meshHeight];
-        triangles = new int[(meshWidth - 1) * (meshHeight - 1) * 6];
+        m_vertices = new Vector3[meshWidth * meshHeight];
+        m_uvs = new Vector2[meshWidth * meshHeight];
+        m_triangles = new int[(meshWidth - 1) * (meshHeight - 1) * 6];
     }
 
     public void AddTriangle(int a, int b, int c)
     {
-        triangles[triangleIndex] = c;
-        triangles[triangleIndex+1] = b;
-        triangles[triangleIndex+2] = a;
-        triangleIndex += 3;
+        m_triangles[_triangleIndex] = c;
+        m_triangles[_triangleIndex+1] = b;
+        m_triangles[_triangleIndex+2] = a;
+        _triangleIndex += 3;
     }
 
     public Mesh CreateMesh()
     {
         Mesh mesh = new Mesh();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.uv = uvs;
+        mesh.vertices = m_vertices;
+        mesh.triangles = m_triangles;
+        mesh.uv = m_uvs;
         mesh.RecalculateNormals();
         return mesh;
     }

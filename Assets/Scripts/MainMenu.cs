@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -6,36 +5,39 @@ using System.IO;
 
 public class MainMenu : MonoBehaviour
 {
-
     #region Singleton
-    public static MainMenu Instance;
 
-    private void Awake()
-    {
-        if (Instance == null)
+        public static MainMenu Instance;
+
+        private void Awake()
         {
-            Instance = this;
-            DontDestroyOnLoad(this);
+            if (Instance == null)
+            {
+                Instance = this;
+                DontDestroyOnLoad(this);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+
     #endregion
 
     #region Show in editor
-    [SerializeField]
-    private TMP_Dropdown filesDropdown;
-    private List<string> filesList = new List<string>();
-    public string selectedFilePath;
+
+        [SerializeField]
+        private TMP_Dropdown _filesDropdown;
+        private List<string> _filesList = new List<string>();
+        public string m_selectedFilePath;
+
     #endregion
 
-    public void LoadButton()
+    public void LoadDropdown()
     {
-        filesList.Clear();
-        filesDropdown.ClearOptions();
-        filesDropdown.RefreshShownValue();
+        _filesList.Clear();
+        _filesDropdown.ClearOptions();
+        _filesDropdown.RefreshShownValue();
 
         string path = Application.persistentDataPath;
         string[] jsonFilesPaths = Directory.GetFiles(@path, "*.json");
@@ -45,26 +47,26 @@ public class MainMenu : MonoBehaviour
 
         foreach (string file in jsonFilesPaths)
         {
-            filesList.Add(Path.GetFileName(file));
+            _filesList.Add(Path.GetFileName(file));
         }
         foreach (string file in pngFilesPaths)
         {
-            filesList.Add(Path.GetFileName(file));
+            _filesList.Add(Path.GetFileName(file));
         }
 
-        selectedFilePath = filesList[filesDropdown.value];
+        m_selectedFilePath = _filesList[_filesDropdown.value];
 
-        filesDropdown.AddOptions(filesList);
-        filesDropdown.RefreshShownValue();
+        _filesDropdown.AddOptions(_filesList);
+        _filesDropdown.RefreshShownValue();
     }
 
     public void DropdownSelect(int index)
     {
         string filePath = Application.persistentDataPath + "/";
-        selectedFilePath = Path.Combine(filePath,filesDropdown.options[filesDropdown.value].text);
+        m_selectedFilePath = Path.Combine(filePath,_filesDropdown.options[_filesDropdown.value].text);
     }
 
-    public void QuitGame()
+    public void QuitButton()
     {
         Application.Quit();
     }

@@ -5,16 +5,16 @@ using TMPro;
 
 public class SliderValue : MonoBehaviour
 {
-
-    TMP_Text text;
+    [SerializeField]
+    private TMP_Text _text;
 
     void Awake()
     {
-        text = GetComponent<TMP_Text>();
+        _text = GetComponent<TMP_Text>();
     }
 
     public void TextUpdate(float value)
     {
-        text.text = value.ToString(); 
+        _text.text = value.ToString(); 
     }
 }

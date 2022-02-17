@@ -19,7 +19,7 @@ public class PNGLoader : MonoBehaviour
 
     public static async Task<Texture2D> LoadMapFromPNG(string path)
     {
-        Texture2D texture = new Texture2D(0,0);
+        Texture2D texture = new Texture2D(0, 0);
         byte[] data;
         if (File.Exists(path))
         {

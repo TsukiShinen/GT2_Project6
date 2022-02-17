@@ -6,13 +6,16 @@ using UnityEngine.UI;
 
 public class OptionsMenu : MonoBehaviour
 {
+    #region Variables
 
-    [SerializeField]
-    private Slider _linesSlider;
-    [SerializeField]
-    private Slider _columnsSlider;
-    [SerializeField]
-    private Slider _speedSlider;
+        [SerializeField]
+        private Slider _linesSlider;
+        [SerializeField]
+        private Slider _columnsSlider;
+        [SerializeField]
+        private Slider _speedSlider;
+
+    #endregion
 
     void Start()
     {
