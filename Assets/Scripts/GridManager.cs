@@ -13,15 +13,12 @@ public struct Cell
     public int x;
     public int y;
 
-    public MeshRenderer mesh;
-
     public bool isAlive;
 
-    public Cell(int pX, int pY, MeshRenderer pMesh, bool pIsAlive)
+    public Cell(int pX, int pY, bool pIsAlive)
     {
         x = pX;
         y = pY;
-        mesh = pMesh;
         isAlive = pIsAlive;
     }
 
@@ -119,7 +116,6 @@ public class GridManager : MonoBehaviour
         LoadSettings();
         CreateGrid();
         CameraManager.Instance.CameraInit();
-        DrawMesh();
     }
 
     public void Init(JsonMap loadedMap)
@@ -149,59 +145,58 @@ public class GridManager : MonoBehaviour
     void CreateGrid()
     {
         UnloadGrid();
+
+        DrawMesh();
         _lstCells = new Cell[_nbrLines * _nbrColumns];
 
+        _lstCellsColor = new Color[_nbrLines * _nbrColumns];
         for (int y = 0; y < _nbrLines; y++)
         {
             for (int x = 0; x < _nbrColumns; x++)
             {
-                GameObject gameObject = Instantiate(_cellPrefab, new Vector3(x, y, 0), new Quaternion(), transform);
-                Cell cell = new Cell(x, y, gameObject.GetComponentInChildren<MeshRenderer>(), false);
+                Cell cell = new Cell(x, y, false);
                 _lstCells[y * _nbrColumns + x] = cell;
+                _lstCellsColor[y * _nbrColumns + x] = Color.black;
             }
         }
 
-        _lstCellsColor = new Color[_nbrLines * _nbrColumns];
-        Texture2D texture = new Texture2D(_nbrColumns, _nbrLines);
-        for (int i = 0; i < _lstCellsColor.Length; i++)
-        {
-            _lstCellsColor[i] = Color.black;
-        }
-        texture.SetPixels(_lstCellsColor);
-        texture.Apply();
-        _meshRenderer.sharedMaterial.mainTexture = texture;
+        ReChargeTexture();
     }
 
     void CreateGrid(JsonCell[] lstCell)
     {
         UnloadGrid();
+
+        DrawMesh();
         _lstCells = new Cell[_nbrLines * _nbrColumns];
 
+        _lstCellsColor = new Color[_nbrLines * _nbrColumns];
         for (int y = 0; y < _nbrLines; y++)
         {
             for (int x = 0; x < _nbrColumns; x++)
             {
-                GameObject gameObject = Instantiate(_cellPrefab, new Vector3(x, y, 0), new Quaternion(), transform);
-                Cell cell = new Cell(x, y, gameObject.GetComponentInChildren<MeshRenderer>(), lstCell[y * _nbrColumns + x].isAlive);
-
-                if (cell.isAlive)
-                {
-                    cell.mesh.sharedMaterial = _aliveMaterial;
-                }
-
+                Cell cell = new Cell(x, y, false);
                 _lstCells[y * _nbrColumns + x] = cell;
+                _lstCellsColor[y * _nbrColumns + x] = lstCell[y * _nbrColumns + x].isAlive ? Color.white : Color.black;
             }
         }
+
+        ReChargeTexture();
+    }
+
+    void ReChargeTexture()
+    {
+        Texture2D texture = new Texture2D(_nbrColumns, _nbrLines);
+        texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        texture.SetPixels(_lstCellsColor);
+        texture.Apply();
+        _meshRenderer.sharedMaterial.mainTexture = texture;
     }
 
     void UnloadGrid()
     {
-        if (_lstCells == null) { return; }
-
-        for (int i = 0; i < _lstCells.Length; i++)
-        {
-            Destroy(_lstCells[i].mesh.gameObject);
-        }
+        // NEW DESTROY TO DO
     }
     #endregion
 
@@ -297,7 +292,6 @@ public class GridManager : MonoBehaviour
 
     private List<int> getTaskCell(int from, int to)
     {
-        Debug.Log($"{from} / {to}");
         List<int> lstIndexToUpdate = new List<int>();
         for (int index = from; index < to; index++)
         {
@@ -380,23 +374,17 @@ public class GridManager : MonoBehaviour
     {
         int index = Mathf.FloorToInt(tileCoord.y) * _nbrColumns + Mathf.FloorToInt(tileCoord.x);
 
-        _lstCells[index].mesh.sharedMaterial = (_lstCells[index].isAlive) ? _deadMaterial : _aliveMaterial;
         _lstCells[index].isAlive = !_lstCells[index].isAlive;
-
-        _lstCellsColor[index] = Color.white;
-        Texture2D texture = new Texture2D(_nbrColumns, _nbrLines);
-        texture.filterMode = FilterMode.Point;
-        texture.wrapMode = TextureWrapMode.Clamp;
-        texture.SetPixels(_lstCellsColor);
-        texture.Apply();
-        _meshRenderer.sharedMaterial.mainTexture = texture;
+        _lstCellsColor[index] = _lstCells[index].isAlive ? Color.white : Color.black;
+        ReChargeTexture();
 
         return _lstCells[index].isAlive;
     }
     private void ChangeCellAt(int index)
     {
-        _lstCells[index].mesh.sharedMaterial = (_lstCells[index].isAlive) ? _deadMaterial : _aliveMaterial;
         _lstCells[index].isAlive = !_lstCells[index].isAlive;
+        _lstCellsColor[index] = _lstCells[index].isAlive ? Color.white : Color.black;
+        ReChargeTexture();
     }
 
     private void SetCellAt(Vector2 tileCoord, bool isAlive)
@@ -405,8 +393,9 @@ public class GridManager : MonoBehaviour
 
         if (_lstCells[index].isAlive == isAlive) { return; }
 
-        _lstCells[index].mesh.sharedMaterial = isAlive ? _aliveMaterial : _deadMaterial;
+        _lstCellsColor[index] = isAlive ? Color.white : Color.black;
         _lstCells[index].isAlive = isAlive;
+        ReChargeTexture();
     }
     #endregion
 
