@@ -226,6 +226,16 @@ public class GridManager : MonoBehaviour
         _running = true;
     }
 
+    public void StopGame()
+    {
+        _running = false;
+    }
+
+    public void StepByStep()
+    {
+        SimulationStep();
+    }
+
     public void OnClick()
     {
         if (_running) { return; }
