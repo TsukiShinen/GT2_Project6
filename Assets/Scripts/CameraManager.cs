@@ -29,17 +29,18 @@ public class CameraManager : MonoBehaviour
     [SerializeField]
     private TMP_InputField InputField;
 
-    public float camSpeed = 0;
+    public float speed = 2;
+    private float camSpeed = 0;
 
     #endregion
     private void Init()
     {
-        camSpeed = (PlayerPrefs.GetInt("nbrLines") + PlayerPrefs.GetInt("nbrColumns"))*3;
+        camSpeed = (PlayerPrefs.GetInt("nbrLines") + PlayerPrefs.GetInt("nbrColumns"))*speed;
     }
     public void CameraInit()
     {
         Vector3 camPos;
-        camPos.x = PlayerPrefs.GetInt("nbrColumns")/2;
+        camPos.x = PlayerPrefs.GetInt("nbrColumns")/3;
         camPos.y = PlayerPrefs.GetInt("nbrLines")/2;
         camPos.z = -5;
 

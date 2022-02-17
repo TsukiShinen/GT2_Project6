@@ -36,10 +36,13 @@ public class MainMenu : MonoBehaviour
         filesList.Clear();
         filesDropdown.ClearOptions();
         filesDropdown.RefreshShownValue();
+
         string path = Application.persistentDataPath;
         string[] jsonFilesPaths = Directory.GetFiles(@path, "*.json");
         string[] pngFilesPaths = Directory.GetFiles(@path, "*.png");
+
         if(jsonFilesPaths.Length == 0 && pngFilesPaths.Length == 0) { return; }
+
         foreach (string file in jsonFilesPaths)
         {
             filesList.Add(Path.GetFileName(file));
@@ -48,15 +51,17 @@ public class MainMenu : MonoBehaviour
         {
             filesList.Add(Path.GetFileName(file));
         }
+
         selectedFilePath = filesList[filesDropdown.value];
+
         filesDropdown.AddOptions(filesList);
         filesDropdown.RefreshShownValue();
     }
 
     public void DropdownSelect(int index)
     {
-        string filePath = Application.persistentDataPath;
-        selectedFilePath = filePath + "/" + filesDropdown.options[filesDropdown.value].text;
+        string filePath = Application.persistentDataPath + "/";
+        selectedFilePath = Path.Combine(filePath,filesDropdown.options[filesDropdown.value].text);
     }
 
     public void QuitGame()

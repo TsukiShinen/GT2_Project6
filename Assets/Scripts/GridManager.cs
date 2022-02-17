@@ -128,6 +128,14 @@ public class GridManager : MonoBehaviour
         CameraManager.Instance.CameraInit();
     }
 
+    public void Init(Texture2D texture)
+    {
+        _running = false;
+        LoadSettings(texture);
+        CreateGrid(texture);
+        CameraManager.Instance.CameraInit();
+    }
+
     private void LoadSettings()
     {
         if (PlayerPrefs.HasKey("nbrLines")) { _nbrLines = PlayerPrefs.GetInt("nbrLines"); }
@@ -139,6 +147,15 @@ public class GridManager : MonoBehaviour
     {
         _nbrLines = loadedMap.nbrLines;
         _nbrColumns = loadedMap.nbrColumns;
+        PlayerPrefs.SetInt("nbrLines", _nbrLines);
+        PlayerPrefs.SetInt("nbrColumns", _nbrColumns);
+        PlayerPrefs.Save();
+    }
+
+    private void LoadSettings(Texture2D texture)
+    {
+        _nbrLines = texture.height;
+        _nbrColumns = texture.width;
         PlayerPrefs.SetInt("nbrLines", _nbrLines);
         PlayerPrefs.SetInt("nbrColumns", _nbrColumns);
         PlayerPrefs.Save();
@@ -184,6 +201,26 @@ public class GridManager : MonoBehaviour
         }
 
         RechargeTexture();
+    }
+
+    void CreateGrid(Texture2D texture)
+    {
+        DrawMesh();
+        _lstCells = new Cell[_nbrLines * _nbrColumns];
+        _lstCellsColor = new Color[_nbrLines * _nbrColumns];
+        _lstCellsColor = texture.GetPixels();
+        for (int y = 0; y < _nbrLines; y++)
+        {
+            for (int x = 0; x < _nbrColumns; x++)
+            {
+                bool alive = _lstCellsColor[y * _nbrColumns + x] == Color.white;
+                Cell cell = new Cell(x, y, alive);
+                _lstCells[y * _nbrColumns + x] = cell;
+            }
+        }
+        texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        _meshRenderer.sharedMaterial.mainTexture = texture;
     }
 
     void RechargeTexture()
@@ -264,16 +301,42 @@ public class GridManager : MonoBehaviour
         RechargeTexture();
     }
 
-    public async void SaveButton()
+    public async void SaveButtonToJson()
     {
         await JsonLoader.SaveMap(inputField.text);
     }
 
+    public async void SaveButtonToPNG()
+    {
+        await PNGLoader.SaveMapToPNG(inputField.text);
+    }
+
     public async void LoadButton()
     {
-        var data = await JsonLoader.LoadMap(MainMenu.Instance.selectedFilePath);
-        JsonMap loadedMap = JsonUtility.FromJson<JsonMap>(data);
-        Init(loadedMap);
+        switch(Path.GetExtension(MainMenu.Instance.selectedFilePath))
+        {
+            case ".json":
+                var data = await JsonLoader.LoadMap(MainMenu.Instance.selectedFilePath);
+                JsonMap loadedMap = JsonUtility.FromJson<JsonMap>(data);
+                Init(loadedMap);
+                break;
+            case ".png":
+                Texture2D texture = await PNGLoader.LoadMapFromPNG(MainMenu.Instance.selectedFilePath);
+                Init(texture);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public Texture2D GetTexture()
+    {
+        Texture2D texture = new Texture2D(_nbrColumns, _nbrLines);
+        texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        texture.SetPixels(_lstCellsColor);
+        texture.Apply();
+        return texture;
     }
     #endregion
 
