@@ -74,14 +74,8 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     private int _stepPerSeconds = 2;
 
-    [Header("Prefabs")]
+    [Header("Mesh")]
 
-    [SerializeField]
-    private GameObject _cellPrefab;
-    [SerializeField]
-    private Material _aliveMaterial;
-    [SerializeField]
-    private Material _deadMaterial;
     [SerializeField]
     private MeshFilter _meshFilter;
     [SerializeField]
@@ -92,7 +86,7 @@ public class GridManager : MonoBehaviour
     [SerializeField]
     private GridMode _gridMode;
 
-    [Header("Mode")]
+    [Header("Input")]
 
     [SerializeField]
     TMP_InputField inputField;
