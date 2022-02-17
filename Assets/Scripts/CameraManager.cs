@@ -34,7 +34,7 @@ public class CameraManager : MonoBehaviour
     #endregion
     private void Init()
     {
-        camSpeed = (PlayerPrefs.GetInt("nbrLines") + PlayerPrefs.GetInt("nbrColumns"))*2;
+        camSpeed = (PlayerPrefs.GetInt("nbrLines") + PlayerPrefs.GetInt("nbrColumns"))*3;
     }
     public void CameraInit()
     {
