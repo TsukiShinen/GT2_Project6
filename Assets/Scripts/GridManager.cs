@@ -235,6 +235,7 @@ public class GridManager : MonoBehaviour
               mouseCoords.y >= 0 && mouseCoords.y < _nbrLines)) { return; }
 
         _lastIsAlive =  ChangeCellAt(mouseCoords);
+        ReChargeTexture();
     }
     public void OnClickStay()
     {
@@ -247,6 +248,7 @@ public class GridManager : MonoBehaviour
               mouseCoords.y >= 0 && mouseCoords.y < _nbrLines)) { return; }
 
         SetCellAt(mouseCoords, _lastIsAlive);
+        ReChargeTexture();
     }
 
     public async void SaveButton()
@@ -289,6 +291,7 @@ public class GridManager : MonoBehaviour
         {
             ChangeCellAt(index);
         }
+        ReChargeTexture();
     }
 
     private List<int> getTaskCell(int from, int to)
@@ -377,7 +380,6 @@ public class GridManager : MonoBehaviour
 
         _lstCells[index].isAlive = !_lstCells[index].isAlive;
         _lstCellsColor[index] = _lstCells[index].isAlive ? Color.white : Color.black;
-        ReChargeTexture();
 
         return _lstCells[index].isAlive;
     }
@@ -385,7 +387,6 @@ public class GridManager : MonoBehaviour
     {
         _lstCells[index].isAlive = !_lstCells[index].isAlive;
         _lstCellsColor[index] = _lstCells[index].isAlive ? Color.white : Color.black;
-        ReChargeTexture();
     }
 
     private void SetCellAt(Vector2 tileCoord, bool isAlive)
@@ -396,7 +397,6 @@ public class GridManager : MonoBehaviour
 
         _lstCellsColor[index] = isAlive ? Color.white : Color.black;
         _lstCells[index].isAlive = isAlive;
-        ReChargeTexture();
     }
     #endregion
 
