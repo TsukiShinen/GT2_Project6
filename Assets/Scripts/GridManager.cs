@@ -191,6 +191,7 @@ public class GridManager : MonoBehaviour
         texture.wrapMode = TextureWrapMode.Clamp;
         texture.SetPixels(_lstCellsColor);
         texture.Apply();
+        Destroy(_meshRenderer.sharedMaterial.mainTexture);
         _meshRenderer.sharedMaterial.mainTexture = texture;
     }
 
